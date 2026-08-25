@@ -1,1 +1,57 @@
-<!doctype html><meta charset=utf-8><title>Suivi generiques</title><p>Page en cours de mise en place...</p>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Suivi seuils génériques</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #8884; }
+  .niveau-ok { color: #2a7; }
+  .niveau-attention { color: #c80; }
+  .niveau-urgent { color: #d33; font-weight: bold; }
+  .warning { background: #fee; border: 1px solid #d33; padding: 0.75rem; border-radius: 6px; margin-top: 1rem; }
+  .updated { color: #888; font-size: 0.85rem; margin-top: 2rem; }
+</style>
+</head>
+<body>
+  <h1>Suivi seuils remise génériques</h1>
+  <p>Montant du mois en cours par laboratoire et par répartiteur, comparé au seuil de remise.</p>
+  <div class="warning"><strong>Attention :</strong><ul><li>Alliance Healthcare : données indisponibles</li></ul></div>
+  <table>
+    <thead>
+      <tr><th>Répartiteur</th><th>Labo</th><th>Montant</th><th>Seuil</th><th>Reste à faire</th><th>Statut</th></tr>
+    </thead>
+    <tbody>
+        <tr class="niveau-ok">
+          <td>OCP Pharmalia</td>
+          <td>Biogaran</td>
+          <td>590€</td>
+          <td>350€</td>
+          <td>—</td>
+          <td>OK</td>
+        </tr>
+
+        <tr class="niveau-urgent">
+          <td>OCP Pharmalia</td>
+          <td>Viatris</td>
+          <td>83€</td>
+          <td>350€</td>
+          <td>267€</td>
+          <td>urgent</td>
+        </tr>
+
+        <tr class="niveau-urgent">
+          <td>OCP Pharmalia</td>
+          <td>Sandoz</td>
+          <td>12€</td>
+          <td>350€</td>
+          <td>338€</td>
+          <td>urgent</td>
+        </tr>
+    </tbody>
+  </table>
+  <p class="updated">Dernière mise à jour : 25/08/2026 16:47</p>
+</body>
+</html>
