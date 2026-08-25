@@ -1,0 +1,9 @@
+browser_profile/
+browser_profile_alliance/
+alliance_storage_state.json
+page_repo/
+state.json
+app.log*
+debug_alliance_timeout.png
+__pycache__/
+*.pyc
