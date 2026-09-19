@@ -51,9 +51,30 @@ mot de passe Gmail habituel.**
 python credentials_setup.py
 ```
 
-Vous saisissez vous-même (saisie masquée) le mot de passe d'application Gmail
-et le token GitHub. Tout est stocké dans le Gestionnaire d'identifiants
-Windows, jamais dans un fichier.
+Vous collez vous-même le mot de passe d'application Gmail et le token GitHub
+(saisie visible, pour éviter les caractères perdus au copier-coller). Laissez
+vide + Entrée pour conserver un secret déjà enregistré — pratique pour ne
+renouveler que le token GitHub.
+
+### Où sont stockés les identifiants
+
+| Quoi | Où |
+|---|---|
+| Mot de passe d'application Gmail | Gestionnaire d'identifiants Windows, service `suivi_generiques`, nom `gmail_app_password` |
+| Token GitHub | Gestionnaire d'identifiants Windows, service `suivi_generiques`, nom `github_token` |
+| Session OCP | profil navigateur `browser_profile/` |
+| Session Alliance | profil `browser_profile_alliance/` + cookies dans `alliance_storage_state.json` |
+
+Pour les consulter ou les supprimer : Panneau de configuration → Gestionnaire
+d'identifiants → Informations d'identification Windows → entrées
+`github_token@suivi_generiques` et `gmail_app_password@suivi_generiques`. Pour les
+modifier, relancez simplement `credentials_setup.py`.
+
+Les fichiers de session (profils navigateur, `alliance_storage_state.json`),
+ainsi que `state.json` et `app.log`, sont exclus du dépôt par `.gitignore` :
+ne les committez jamais (le dépôt est public). Le token n'est jamais écrit sur
+disque : il est passé en en-tête HTTP le temps du push, et masqué dans les
+messages d'erreur de `app.log`.
 
 ### 5. Connexion initiale aux portails
 

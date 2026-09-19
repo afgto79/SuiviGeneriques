@@ -90,7 +90,13 @@ def _run_git(*args: str, extra_header: str | None = None) -> None:
     if extra_header:
         cmd += ["-c", f"http.extraheader={extra_header}"]
     cmd += list(args)
-    subprocess.run(cmd, check=True, capture_output=True, text=True)
+    try:
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+    except subprocess.CalledProcessError as e:
+        # La commande brute contient l'en-tête d'authentification (token en base64) :
+        # on la ré-émet masquée, sans chaînage, pour qu'elle n'atterrisse jamais dans app.log.
+        safe_cmd = ["http.extraheader=<masqué>" if c.startswith("http.extraheader=") else c for c in cmd]
+        raise subprocess.CalledProcessError(e.returncode, safe_cmd, e.stdout, e.stderr) from None
 
 
 def publish(statuses: list[LaboStatus], scrape_errors: dict[str, str], today: date | None = None) -> None:
