@@ -6,16 +6,21 @@ authentifiée dans le profil de navigateur persistant. Aucune saisie d'identifia
 """
 from __future__ import annotations
 
+from datetime import date
+
 from playwright.sync_api import Page
 
-from config import OCP_API_PATH, OCP_LABEL_MAP, OCP_URL
+from config import OCP_API_PATH, OCP_LABEL_MAP, OCP_MAX_AGE_JOURS, OCP_URL
 from thresholds import parse_amount_fr
 
-from . import SessionExpired
+from . import DonneesPerimees, SessionExpired
 
+# cache:'no-store' + paramètre _=horodatage (comme le fait le site OCP lui-même) :
+# sans ça, Chromium a resservi la même réponse depuis son cache HTTP du 14/09 au
+# 23/09/2026 (montant Biogaran figé à 148€ alors que le portail affichait 300€).
 _FETCH_JS = """
 async () => {
-    const r = await fetch(%r, {credentials: 'include'});
+    const r = await fetch(%r + '?_=' + Date.now(), {credentials: 'include', cache: 'no-store'});
     const ct = r.headers.get('content-type') || '';
     if (!ct.includes('json')) {
         return {ok: false, status: r.status, notJson: true};
@@ -26,12 +31,16 @@ async () => {
 """ % OCP_API_PATH
 
 
-def fetch_ocp_amounts(page: Page) -> dict[str, float]:
-    """Retourne {"Biogaran": montant, "Viatris": montant, "Sandoz": montant} (brut HT).
+def fetch_ocp_amounts(page: Page, today: date | None = None) -> tuple[dict[str, float], date]:
+    """Retourne ({"Biogaran": montant, "Viatris": montant, "Sandoz": montant} (brut HT),
+    date de mise à jour des données côté OCP).
 
     Lève SessionExpired si la session n'est plus valide (l'API ne répond pas en JSON,
-    typiquement parce qu'elle a redirigé vers une page de login).
+    typiquement parce qu'elle a redirigé vers une page de login), et DonneesPerimees si
+    la date de mise à jour OCP est trop ancienne ou d'un autre mois (en début de mois,
+    'MoisEnCours' contient encore le total du mois précédent pendant 1-2 jours).
     """
+    today = today or date.today()
     page.goto(OCP_URL, wait_until="domcontentloaded")
     result = page.evaluate(_FETCH_JS)
 
@@ -39,6 +48,15 @@ def fetch_ocp_amounts(page: Page) -> dict[str, float]:
         raise SessionExpired(f"OCP: réponse non-JSON (status {result.get('status')}) — session probablement expirée")
 
     data = result["data"]
+    try:
+        date_maj = date.fromisoformat(data["dateMAJ"][:10])
+    except (KeyError, TypeError, ValueError):
+        raise DonneesPerimees(f"OCP: dateMAJ absente ou illisible ({data.get('dateMAJ')!r})") from None
+    if (date_maj.year, date_maj.month) != (today.year, today.month):
+        raise DonneesPerimees(f"OCP: données du {date_maj:%d/%m/%Y}, pas encore basculées sur le mois en cours")
+    if (today - date_maj).days > OCP_MAX_AGE_JOURS:
+        raise DonneesPerimees(f"OCP: données du {date_maj:%d/%m/%Y}, plus de {OCP_MAX_AGE_JOURS} jours")
+
     periodes = data.get("listePeriodes", [])
     mois_en_cours = next((p for p in periodes if p.get("periode") == "MoisEnCours"), None)
     if mois_en_cours is None:
@@ -54,4 +72,4 @@ def fetch_ocp_amounts(page: Page) -> dict[str, float]:
             continue
         amounts[canonical] = parse_amount_fr(raw_value)
 
-    return amounts
+    return amounts, date_maj

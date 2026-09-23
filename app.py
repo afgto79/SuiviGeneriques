@@ -32,7 +32,7 @@ from config import (
 )
 from emailer import send_weekly_email
 from page_publisher import publish as publish_page
-from scraping import SessionExpired
+from scraping import DonneesPerimees, SessionExpired
 from scraping.alliance import fetch_alliance_amounts
 from scraping.ocp import fetch_ocp_amounts
 from thresholds import build_statuses
@@ -118,6 +118,7 @@ def _run_check_inner(icon: pystray.Icon | None, force_email: bool) -> None:
     today = date.today()
     scrape_errors: dict[str, str] = {}
     ocp_amounts: dict[str, float] = {}
+    data_dates: dict[str, date] = {}
     alliance_amounts: dict[str, float] = {}
 
     with sync_playwright() as p:
@@ -127,8 +128,8 @@ def _run_check_inner(icon: pystray.Icon | None, force_email: bool) -> None:
         try:
             page = context.new_page()
             try:
-                ocp_amounts = fetch_ocp_amounts(page)
-            except SessionExpired as e:
+                ocp_amounts, data_dates["OCP Pharmalia"] = fetch_ocp_amounts(page, today)
+            except (SessionExpired, DonneesPerimees) as e:
                 scrape_errors["OCP Pharmalia"] = str(e)
                 logger.warning("OCP: %s", e)
         finally:
@@ -175,7 +176,7 @@ def _run_check_inner(icon: pystray.Icon | None, force_email: bool) -> None:
 
     if not total_failure:
         try:
-            publish_page(statuses, scrape_errors, today)
+            publish_page(statuses, scrape_errors, today, data_dates)
         except Exception:  # la page est un bonus : ne doit jamais faire échouer tout le cycle
             logger.exception("Échec de publication de la page")
 

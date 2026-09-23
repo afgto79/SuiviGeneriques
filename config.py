@@ -32,6 +32,9 @@ SMTP_PORT = 587
 # --- Portails ---
 OCP_URL = "https://www.ocp-pharmalia.fr/ocp-pharmacien/pilotage/edata/mes-achats-generiques"
 OCP_API_PATH = "/ocp-back/edata/achatGenerique"
+# Âge max (jours) de la date de mise à jour OCP (dateMAJ) avant de signaler des données
+# périmées : OCP a habituellement 1-2 jours de décalage, jusqu'à 4 sur un week-end.
+OCP_MAX_AGE_JOURS = 4
 ALLIANCE_URL = "https://my.alliance-healthcare.fr/group/pro/laboratoires-generiques#/turnover/generics"
 
 # --- Répertoires locaux ---
