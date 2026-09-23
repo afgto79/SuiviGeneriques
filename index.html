@@ -2,83 +2,112 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Suivi seuils génériques</title>
 <style>
-  :root { color-scheme: light dark; }
-  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
-  table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-  th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid #8884; }
-  .niveau-ok { color: #2a7; }
-  .niveau-attention { color: #c80; }
-  .niveau-urgent { color: #d33; font-weight: bold; }
-  .warning { background: #fee; border: 1px solid #d33; padding: 0.75rem; border-radius: 6px; margin-top: 1rem; }
-  .updated { color: #888; font-size: 0.85rem; margin-top: 2rem; }
+  :root {
+    color-scheme: light dark;
+    --bg: #f6f5f8; --card: #ffffff; --text: #1d1b22; --muted: #6f6a78; --line: #e7e4ec;
+    --ok: #17875a; --attention: #c77700; --urgent: #d12c2c;
+    --cencora: #461e96; --cencora-tint: #ece6f7;
+    --ocp: #00843d; --ocp-tint: #e3f3e8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141218; --card: #1e1b24; --text: #ece9f1; --muted: #9a94a5; --line: #2f2b37;
+      --ok: #3ccf8e; --attention: #f0a53a; --urgent: #ff6b6b;
+      --cencora: #b597f0; --cencora-tint: #2b2240;
+      --ocp: #4cc97c; --ocp-tint: #1b3326;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font-family: "Segoe UI", system-ui, -apple-system, sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 2rem 16px 3rem; }
+  h1 { font-size: 1.5rem; margin: 0 0 0.25rem; letter-spacing: -0.01em; }
+  .intro { color: var(--muted); margin: 0 0 1.75rem; }
+  section { background: var(--card); border-radius: 12px; margin-bottom: 1.5rem; overflow: hidden;
+             box-shadow: 0 1px 3px #0000000f, 0 4px 16px #00000008; border-top: 5px solid var(--brand); }
+  section.cencora { --brand: var(--cencora); --tint: var(--cencora-tint); }
+  section.ocp { --brand: var(--ocp); --tint: var(--ocp-tint); }
+  h2 { margin: 0; padding: 1rem 1.25rem 0.75rem; text-align: center; color: var(--brand);
+        font-size: 1.6rem; font-weight: 800; letter-spacing: 0.04em; }
+  table { width: 100%; border-collapse: collapse; font-size: 1.05rem; }
+  th { background: var(--tint); color: var(--brand); text-align: left; font-weight: 700;
+        padding: 0.6rem 1.25rem; font-size: 0.9rem; }
+  td { padding: 0.7rem 1.25rem; border-bottom: 1px solid var(--line); }
+  th:not(:first-child), td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody tr:last-child td { border-bottom: none; }
+  .niveau-ok { color: var(--ok); }
+  .niveau-attention { color: var(--attention); font-weight: 600; }
+  .niveau-urgent { color: var(--urgent); font-weight: 700; }
+  .indispo { color: var(--muted); font-style: italic; text-align: center !important; }
+  .note { margin: 0; padding: 0.6rem 1.25rem 0.9rem; color: var(--muted); font-size: 0.8rem; text-align: right; }
+  .note.alerte { color: var(--urgent); font-weight: 600; }
+  .echeance { display: inline-block; margin-top: 0.5rem; padding: 0.15rem 0.65rem; border-radius: 999px;
+               background: var(--line); color: var(--text); font-size: 0.85rem; font-weight: 600; }
+  .echeance.proche { background: var(--urgent); color: #fff; }
+  .barre { height: 4px; margin: 0.35rem 0 0 auto; width: 7rem; max-width: 100%;
+           background: var(--line); border-radius: 2px; overflow: hidden; }
+  .barre span { display: block; height: 100%; background: currentColor; }
+  .updated { color: var(--muted); font-size: 0.8rem; text-align: center; }
 </style>
 </head>
 <body>
+<main>
   <h1>Suivi seuils remise génériques</h1>
-  <p>Montant du mois en cours par laboratoire et par répartiteur, comparé au seuil de remise.</p>
+  <p class="intro">Achats du mois en cours par laboratoire · seuil de remise 350 €<br>
+    <span class="echeance proche">J-7 avant la fin du mois</span></p>
   
-  <table>
-    <thead>
-      <tr><th>Répartiteur</th><th>Labo</th><th>Montant</th><th>Seuil</th><th>Reste à faire</th><th>Statut</th></tr>
-    </thead>
-    <tbody>
-        <tr class="niveau-ok">
-          <td>OCP Pharmalia</td>
-          <td>Biogaran</td>
-          <td>463€</td>
-          <td>350€</td>
-          <td>—</td>
-          <td>OK</td>
-        </tr>
-
-        <tr class="niveau-urgent">
-          <td>OCP Pharmalia</td>
-          <td>Viatris</td>
-          <td>0€</td>
-          <td>350€</td>
-          <td>350€</td>
-          <td>urgent</td>
-        </tr>
-
-        <tr class="niveau-urgent">
-          <td>OCP Pharmalia</td>
-          <td>Sandoz</td>
-          <td>0€</td>
-          <td>350€</td>
-          <td>350€</td>
-          <td>urgent</td>
-        </tr>
-
-        <tr class="niveau-ok">
-          <td>Alliance Healthcare</td>
-          <td>Biogaran</td>
-          <td>3144€</td>
-          <td>350€</td>
-          <td>—</td>
-          <td>OK</td>
-        </tr>
-
-        <tr class="niveau-urgent">
-          <td>Alliance Healthcare</td>
-          <td>Viatris</td>
-          <td>298€</td>
-          <td>350€</td>
-          <td>52€</td>
-          <td>urgent</td>
-        </tr>
-
-        <tr class="niveau-urgent">
-          <td>Alliance Healthcare</td>
-          <td>Sandoz</td>
-          <td>186€</td>
-          <td>350€</td>
-          <td>164€</td>
-          <td>urgent</td>
-        </tr>
-    </tbody>
-  </table>
-  <p class="updated">Dernière mise à jour : 23/09/2026 12:42<br>Données OCP Pharmalia au 22/09/2026</p>
+  <section class="cencora">
+    <h2>CENCORA</h2>
+    <table>
+      <thead><tr><th>Labo</th><th>Reste à faire</th><th>Montant actuel</th></tr></thead>
+      <tbody>
+          <tr class="niveau-ok">
+            <td>Biogaran</td>
+            <td>OK</td>
+            <td>3 144 €<div class="barre"><span style="width:100%"></span></div></td>
+          </tr>
+          <tr class="niveau-urgent">
+            <td>Viatris</td>
+            <td>52 €</td>
+            <td>298 €<div class="barre"><span style="width:85%"></span></div></td>
+          </tr>
+          <tr class="niveau-urgent">
+            <td>Sandoz</td>
+            <td>164 €</td>
+            <td>186 €<div class="barre"><span style="width:53%"></span></div></td>
+          </tr>
+      </tbody>
+    </table>
+    
+  </section>
+  <section class="ocp">
+    <h2>OCP</h2>
+    <table>
+      <thead><tr><th>Labo</th><th>Reste à faire</th><th>Montant actuel</th></tr></thead>
+      <tbody>
+          <tr class="niveau-ok">
+            <td>Biogaran</td>
+            <td>OK</td>
+            <td>463 €<div class="barre"><span style="width:100%"></span></div></td>
+          </tr>
+          <tr class="niveau-urgent">
+            <td>Viatris</td>
+            <td>350 €</td>
+            <td>0 €<div class="barre"><span style="width:0%"></span></div></td>
+          </tr>
+          <tr class="niveau-urgent">
+            <td>Sandoz</td>
+            <td>350 €</td>
+            <td>0 €<div class="barre"><span style="width:0%"></span></div></td>
+          </tr>
+      </tbody>
+    </table>
+    <p class="note">Données au 22/09/2026</p>
+  </section>
+  <p class="updated">Dernier relevé : 23/09/2026 13:03</p>
+</main>
 </body>
 </html>
